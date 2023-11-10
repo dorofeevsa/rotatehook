@@ -72,13 +72,14 @@ func New(p string, options ...Option) (*RotateLog, error) {
 	}
 
 	return &RotateLog{
-		clock:         clock,
-		globPattern:   globPattern,
-		linkName:      linkName,
-		maxAge:        maxAge,
-		pattern:       pattern,
-		rotationTime:  rotationTime,
-		rotationCount: rotationCount,
+		clock:            clock,
+		globPattern:      globPattern,
+		linkName:         linkName,
+		maxAge:           maxAge,
+		pattern:          pattern,
+		rotationTime:     rotationTime,
+		rotationCount:    rotationCount,
+		rotationNotifier: make(chan string),
 	}, nil
 }
 
@@ -121,6 +122,10 @@ func (rl *RotateLog) Write(p []byte) (n int, err error) {
 	}
 
 	return out.Write(p)
+}
+
+func (rl *RotateLog) GetRotationNotifier() <-chan string {
+	return rl.rotationNotifier
 }
 
 // must be locked during this operation
@@ -173,6 +178,12 @@ func (rl *RotateLog) getWriter_nolock(bailOnRotateFail, useGenerationalNames boo
 	rl.outFh = fh
 	rl.curFn = filename
 	rl.generation = generation
+	select {
+	case rl.rotationNotifier <- rl.curFn:
+		fmt.Fprintf(os.Stderr, "%s\n", "RBC log file successsfully rotated")
+	default:
+		fmt.Println("RBC log file rotated, but no handler used inside")
+	}
 
 	return fh, nil
 }

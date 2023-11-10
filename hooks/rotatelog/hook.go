@@ -9,16 +9,19 @@ import (
 
 // SyslogHook to send logs via syslog.
 type RotatelogHook struct {
-	w         *RotateLog
-	formatter logrus.Formatter
+	w               *RotateLog
+	formatter       logrus.Formatter
+	rotationHandler func(string)
 }
 
 // Creates a hook to be added to an instance of logger. This is called with
 // `hook, err := NewHook("./access_log.%Y%m%d",
-//									WithLinkName("./access_log"),
-// 									WithMaxAge(24 * time.Hour),
-//									WithRotationTime(time.Hour),
-//									WithClock(UTC))`
+//
+//	WithLinkName("./access_log"),
+//	WithMaxAge(24 * time.Hour),
+//	WithRotationTime(time.Hour),
+//	WithClock(UTC))`
+//
 // `if err == nil { log.Hooks.Add(hook.SetFormatter(&logrus.JSONFormatter{})) }`
 func NewHook(p string, options ...Option) (*RotatelogHook, error) {
 	w, err := New(p, options...)
@@ -27,6 +30,19 @@ func NewHook(p string, options ...Option) (*RotatelogHook, error) {
 	}
 
 	return &RotatelogHook{w: w}, nil
+}
+
+func (hook *RotatelogHook) SubscribeToRotation(handler func(string)) {
+	ch := hook.w.GetRotationNotifier()
+	hook.rotationHandler = handler
+	go func() {
+		for {
+			select {
+			case filePath := <-ch:
+				hook.rotationHandler(filePath)
+			}
+		}
+	}()
 }
 
 func (hook *RotatelogHook) Fire(entry *logrus.Entry) error {

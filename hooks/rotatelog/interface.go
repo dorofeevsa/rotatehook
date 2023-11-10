@@ -11,17 +11,18 @@ import (
 // RotateLog represents a log file that gets
 // automatically rotated as you write to it.
 type RotateLog struct {
-	clock         Clock
-	curFn         string
-	globPattern   string
-	generation    int
-	linkName      string
-	maxAge        time.Duration
-	mutex         sync.RWMutex
-	outFh         *os.File
-	pattern       *strftime.Strftime
-	rotationTime  time.Duration
-	rotationCount uint
+	clock            Clock
+	curFn            string
+	globPattern      string
+	generation       int
+	linkName         string
+	maxAge           time.Duration
+	mutex            sync.RWMutex
+	outFh            *os.File
+	pattern          *strftime.Strftime
+	rotationTime     time.Duration
+	rotationCount    uint
+	rotationNotifier chan string
 }
 
 // Clock is the interface used by the RotateLog
