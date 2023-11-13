@@ -1,13 +1,12 @@
-package airbrake // import "github.com/jefurry/logrus/hooks/airbrake"
+package airbrake // import "github.com/dorofeevsa/logrus/hooks/airbrake"
 
 import (
 	"errors"
 	"fmt"
+	"github.com/airbrake/gobrake"
+	"github.com/dorofeevsa/logrus"
 	"net/http"
 	"os"
-
-	"github.com/airbrake/gobrake"
-	"github.com/jefurry/logrus"
 )
 
 // AirbrakeHook to send exceptions to an exception-tracking service compatible

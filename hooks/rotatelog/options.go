@@ -1,9 +1,8 @@
 package rotatelog
 
 import (
+	"logrus/hooks/rotatelog/internal/option"
 	"time"
-
-	"github.com/jefurry/logrus/hooks/rotatelog/internal/option"
 )
 
 const (

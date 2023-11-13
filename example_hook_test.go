@@ -1,8 +1,8 @@
 package logrus_test
 
 import (
-	"github.com/jefurry/logrus"
-	"github.com/jefurry/logrus/hooks/airbrake"
+	"github.com/dorofeevsa/logrus"
+	"github.com/dorofeevsa/logrus/hooks/airbrake"
 	"os"
 )
 

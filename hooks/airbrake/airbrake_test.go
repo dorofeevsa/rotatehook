@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/airbrake/gobrake"
-	"github.com/jefurry/logrus"
+	"github.com/dorofeevsa/logrus"
 )
 
 type customErr struct {

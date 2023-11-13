@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/jefurry/logrus"
-	rotatelog "github.com/jefurry/logrus/hooks/rotatelog"
+	"github.com/dorofeevsa/logrus"
+	rotatelog "github.com/dorofeevsa/logrus/hooks/rotatelog"
 	"github.com/stretchr/testify/assert"
 )
 

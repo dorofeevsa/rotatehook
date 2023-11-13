@@ -2,7 +2,7 @@ package lfslog
 
 import (
 	"bytes"
-	"github.com/jefurry/logrus"
+	"github.com/dorofeevsa/logrus"
 	"io/ioutil"
 	"os"
 	"testing"

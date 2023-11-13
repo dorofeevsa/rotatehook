@@ -1,4 +1,4 @@
-package: github.com/jefurry/logrus
+package: github.com/dorofeevsa/logrus
 import:
 - package: github.com/airbrake/gobrake
   version: ^3.5.1

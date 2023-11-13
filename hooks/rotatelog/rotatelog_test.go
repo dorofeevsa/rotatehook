@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	rotatelog "github.com/jefurry/logrus/hooks/rotatelog"
+	rotatelog "github.com/dorofeevsa/logrus/hooks/rotatelog"
 	"github.com/jonboulle/clockwork"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

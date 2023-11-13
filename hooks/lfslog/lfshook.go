@@ -4,7 +4,7 @@ package lfslog
 import (
 	"errors"
 	"fmt"
-	"github.com/jefurry/logrus"
+	"github.com/dorofeevsa/logrus"
 	"io"
 	"log"
 	"os"
