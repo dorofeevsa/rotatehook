@@ -7,8 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dorofeevsa/logrus"
-	rotatelog "github.com/dorofeevsa/logrus/hooks/rotatelog"
+	"github.com/sirupsen/logrus"
+	rotatelog "rotateloghook/pkg/rotatelog"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -29,8 +30,9 @@ func TestLogEntryWritten(t *testing.T) {
 	if err != nil {
 		t.Errorf(err.Error())
 	}
+	//hook.SetFormatter(&logrus.JSONFormatter{})
 
-	log.Hooks.Add(hook.SetFormatter(&logrus.JSONFormatter{}))
+	log.Hooks.Add(hook)
 
 	for _, level := range hook.Levels() {
 		if len(log.Hooks[level]) != 1 {

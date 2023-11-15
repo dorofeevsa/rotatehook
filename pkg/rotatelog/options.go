@@ -1,7 +1,7 @@
 package rotatelog
 
 import (
-	"logrus/hooks/rotatelog/internal/option"
+	"rotateloghook/pkg/rotatelog/internal/option"
 	"time"
 )
 
@@ -11,6 +11,7 @@ const (
 	OptKeyMaxAge        = "max-age"
 	OptKeyRotationTime  = "rotation-time"
 	OptKeyRotationCount = "rotation-count"
+	OptKeyRotationSize  = "rotation-size"
 )
 
 // WithClock creates a new Option that sets a clock
@@ -60,6 +61,10 @@ func WithRotationTime(d time.Duration) Option {
 // WithRotationCount creates a new Option that sets the
 // number of files should be kept before it gets
 // purged from the file system.
-func WithRotationCount(n uint) Option {
+func WithRotationCount(n int) Option {
 	return option.New(OptKeyRotationCount, n)
+}
+
+func WithRotationSize(s int64) Option {
+	return option.New(OptKeyRotationSize, s)
 }

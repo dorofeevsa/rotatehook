@@ -11,18 +11,21 @@ import (
 // RotateLog represents a log file that gets
 // automatically rotated as you write to it.
 type RotateLog struct {
-	clock            Clock
-	curFn            string
-	globPattern      string
-	generation       int
-	linkName         string
-	maxAge           time.Duration
-	mutex            sync.RWMutex
-	outFh            *os.File
-	pattern          *strftime.Strftime
-	rotationTime     time.Duration
-	rotationCount    uint
-	rotationNotifier chan string
+	clock              Clock
+	curFn              string
+	globPattern        string
+	generation         int
+	linkName           string
+	maxAge             time.Duration
+	mutex              sync.RWMutex
+	outFh              *os.File
+	pattern            *strftime.Strftime
+	rotationTime       time.Duration
+	rotationCount      int
+	rotationNotifier   chan RotationEvent
+	rotationSize       int64
+	rotationConditions []RotationPredicate
+	purgeCheckers      []PurgeChecker
 }
 
 // Clock is the interface used by the RotateLog
@@ -45,4 +48,13 @@ var Local = clockFn(time.Now)
 type Option interface {
 	Name() string
 	Value() interface{}
+}
+
+type RotationPredicate func() (bool, string)
+
+type PurgeChecker func(matches []string, result *map[string]struct{}) error
+
+type RotationEvent struct {
+	PrevFileName string
+	NewFileName  string
 }

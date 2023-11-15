@@ -2,16 +2,15 @@ package rotatelog
 
 import (
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
-
-	"github.com/dorofeevsa/logrus"
 )
 
 // SyslogHook to send logs via syslog.
 type RotatelogHook struct {
 	w               *RotateLog
 	formatter       logrus.Formatter
-	rotationHandler func(string)
+	rotationHandler func(RotationEvent)
 }
 
 // Creates a hook to be added to an instance of logger. This is called with
@@ -32,14 +31,14 @@ func NewHook(p string, options ...Option) (*RotatelogHook, error) {
 	return &RotatelogHook{w: w}, nil
 }
 
-func (hook *RotatelogHook) SubscribeToRotation(handler func(string)) {
+func (hook *RotatelogHook) SubscribeToRotation(handler func(event RotationEvent)) {
 	ch := hook.w.GetRotationNotifier()
 	hook.rotationHandler = handler
 	go func() {
 		for {
 			select {
-			case filePath := <-ch:
-				hook.rotationHandler(filePath)
+			case rotEvt := <-ch:
+				hook.rotationHandler(rotEvt)
 			}
 		}
 	}()

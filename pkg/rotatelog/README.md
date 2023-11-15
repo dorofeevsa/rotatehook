@@ -6,8 +6,8 @@
 import (
   "time"
 
-  "github.com/jefurry/logrus"
-  rlog "github.com/jefurry/logrus/hooks/rotatelog"
+  "github.com/sirupsen/logrus"
+  rlog "github.com/sirupsen/logrus/hooks/rotatelog"
 )
 
 func main() {
@@ -33,7 +33,7 @@ to setup logrotate!
 To install, simply issue a `go get`:
 
 ```
-go get github.com/jefurry/logrus/hooks/rotatelog
+go get github.com/sirupsen/logrus/hooks/rotatelog
 ```
 
 OPTIONS
