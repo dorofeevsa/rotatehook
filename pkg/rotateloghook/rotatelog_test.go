@@ -1,4 +1,4 @@
-package rotatelog_test
+package rotateloghook_test
 
 import (
 	"fmt"
@@ -14,7 +14,7 @@ import (
 	"github.com/jonboulle/clockwork"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
-	rotatelog "rotateloghook/pkg/rotatelog"
+	rotatelog "rotateloghook/pkg/rotateloghook"
 )
 
 func TestSatisfiesIOWriter(t *testing.T) {

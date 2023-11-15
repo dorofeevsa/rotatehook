@@ -1,8 +1,8 @@
-// package rotatelog is a port of File-RotateLog from Perl
+// package rotateloghook is a port of File-RotateLog from Perl
 // (https://metacpan.org/release/File-RotateLog), and it allows
 // you to automatically rotate output files when you write to them
 // according to the filename pattern that you can specify.
-package rotatelog
+package rotateloghook
 
 import (
 	"fmt"

@@ -1,4 +1,4 @@
-package rotatelog_test
+package rotateloghook_test
 
 import (
 	"io/ioutil"
@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	rotatelog "rotateloghook/pkg/rotatelog"
+	rotatelog "rotateloghook/pkg/rotateloghook"
 
 	"github.com/stretchr/testify/assert"
 )

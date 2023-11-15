@@ -1,4 +1,4 @@
-package rotatelog
+package rotateloghook
 
 import (
 	"fmt"
