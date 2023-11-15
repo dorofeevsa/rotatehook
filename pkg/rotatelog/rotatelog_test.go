@@ -1,4 +1,4 @@
-package rotatelog_test
+package rotateloghook_test
 
 import (
 	"fmt"
