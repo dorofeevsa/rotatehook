@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"github.com/sirupsen/logrus"
-	rlog "rotateloghook/pkg/rotatelog"
+	rlog "rotateloghook/pkg/rotateloghook"
 	"time"
 )
 
