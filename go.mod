@@ -1,4 +1,4 @@
-module rotateloghook
+module github.com/dorofeevsa/pkg/rotateloghook
 
 go 1.21.0
 
