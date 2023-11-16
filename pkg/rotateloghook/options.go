@@ -1,7 +1,7 @@
 package rotateloghook
 
 import (
-	"rotateloghook/pkg/rotateloghook/internal/option"
+	"github.com/dorofeevsa/rotateloghook/pkg/rotateloghook/internal/option"
 	"time"
 )
 
