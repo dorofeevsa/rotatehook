@@ -16,9 +16,9 @@ func main() {
 		//rlog.WithMaxAge(time.Second*25), // Old logs will be purged
 		//rlog.WithRotationCount(7), // Count of storing logfiles
 		rlog.WithRotationTime(time.Second*10), // Rotate after period. Warning:Period precision MUST be presented in filename time pattern!
-		//rlog.WithClock(rlog.UTC), // timezone, may be omitted
-		rlog.WithRotationSize(5*1024*1024), // Max file size in bytes
-		rlog.WithLinkName("./CommonLog"),   // Can create fresher symbolyc link on actual log file. Correct working only in root folder
+		rlog.WithClock(rlog.UTC),              // timezone, may be omitted
+		rlog.WithRotationSize(5*1024*1024),    // Max file size in bytes
+		rlog.WithLinkName("./CommonLog"),      // Can create fresher symbolyc link on actual log file. Correct working only in root folder
 	)
 	if err != nil {
 		log.Panicf("Can't initialize rotation logger: %s", err)
