@@ -21,6 +21,7 @@ type RotateLog struct {
 	outFh              *os.File
 	pattern            *strftime.Strftime
 	rotationTime       time.Duration
+	lastTs             time.Time
 	rotationCount      int
 	rotationNotifier   chan RotationEvent
 	rotationSize       int64
@@ -34,10 +35,6 @@ type Clock interface {
 	Now() time.Time
 }
 type clockFn func() time.Time
-
-// UTC is an object satisfying the Clock interface, which
-// returns the current time in UTC
-var UTC = clockFn(func() time.Time { return time.Now().UTC() })
 
 // Local is an object satisfying the Clock interface, which
 // returns the current time in the local timezone

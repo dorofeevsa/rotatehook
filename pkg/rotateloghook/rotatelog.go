@@ -8,8 +8,10 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"time"
 
 	strftime "github.com/lestrrat-go/strftime"
@@ -98,8 +100,11 @@ func (rl *RotateLog) buildSizeCondition() RotationPredicate {
 		fi, err := os.Stat(rl.curFn)
 		if err == nil {
 			if rl.rotationSize > 0 && rl.rotationSize < fi.Size() {
-				rl.generation++
-				return true, fmt.Sprintf("%s_%v", rl.genFilename(), rl.generation) // foo.log -> foo_1.log
+				s, err := rl.newNameBuilder()
+				if err != nil {
+					return false, ""
+				}
+				return true, s
 			}
 		}
 		return false, ""
@@ -108,25 +113,75 @@ func (rl *RotateLog) buildSizeCondition() RotationPredicate {
 
 func (rl *RotateLog) buildRotationTimeCondition() RotationPredicate {
 	return func() (bool, string) {
-		filename := rl.genFilename()
-		if rl.generation > 0 {
-			filename = fmt.Sprintf("%s_%v", filename, rl.generation)
-		}
-
-		if rl.curFn != filename {
-			rl.generation = 0 // design crutch - condition predicate should not change owner's object, but we have, what we have
-			return true, filename
+		now := rl.clock.Now()
+		elapsedTime := now.Sub(rl.lastTs)
+		if elapsedTime > rl.rotationTime {
+			s, err := rl.newNameBuilder()
+			if err != nil {
+				return false, ""
+			}
+			return true, s
 		}
 		return false, ""
+	}
+}
+
+func (rl *RotateLog) counterNameBuilder(expectedFn string) (string, error) {
+	res := ""
+	ext := path.Ext(expectedFn)
+	fp := ""
+	if len(ext) > 0 {
+		fp = strings.TrimSuffix(expectedFn, ext)
+	}
+	// we try to make 1000 attempts to create a name with an incrementing counter
+	// this will allow you not to overwrite existing files if they exist
+	// in worst case, we assume that the user has configured the rotation settings incorrectly
+	for range make([]int, 1000) {
+		rl.generation++
+		if len(ext) > 0 {
+			//files with extension: dir/foo.log -> dir/foo_1.log
+			res = fmt.Sprintf("%s_%v%s", fp, rl.generation, ext)
+		} else {
+			// files without extension: dir/foo -> dir/foo_1
+			res = fmt.Sprintf("%s_%v", expectedFn, rl.generation)
+		}
+
+		if _, err := os.Stat(res); errors.Is(err, os.ErrNotExist) {
+			return res, nil
+		}
+	}
+	return "", fmt.Errorf("сan't create a name with a counter based on the current file %s, check the configuration", expectedFn)
+
+}
+
+// build new filename: by formatted timestamp or formatted timestamp and counter suffix.
+// Ensures that there is no file with an identical name in the directory
+func (rl *RotateLog) newNameBuilder() (string, error) {
+	expectedFn := rl.genFilename()
+
+	fileExist := true
+	if _, err := os.Stat(expectedFn); errors.Is(err, os.ErrNotExist) {
+		fileExist = false
+	}
+
+	if rl.curFn != expectedFn && !fileExist {
+		rl.generation = 0
+		return expectedFn, nil
+	} else {
+		res, err := rl.counterNameBuilder(expectedFn)
+		if err != nil {
+			return "", err
+		}
+		return res, nil
 	}
 }
 
 func (rl *RotateLog) buildFileAgeChecker() PurgeChecker {
 	return func(filesList []string, result *map[string]struct{}) error {
 
-		for _, path := range filesList {
+		for _, fp := range filesList {
 
-			fl, err := os.Lstat(path)
+			fl, err := os.Lstat(fp)
 			if err != nil {
 				continue
 			}
@@ -137,7 +192,7 @@ func (rl *RotateLog) buildFileAgeChecker() PurgeChecker {
 
 			fileAge := rl.clock.Now().UTC().Sub(fl.ModTime().UTC())
 			if fileAge > rl.maxAge {
-				(*result)[path] = struct{}{}
+				(*result)[fp] = struct{}{}
 				continue
 			}
 		}
@@ -169,7 +224,7 @@ func (rl *RotateLog) RegisterPurgeChecker(checker PurgeChecker) {
 	rl.purgeCheckers = append(rl.purgeCheckers, checker)
 }
 
-// method should compute rotate conditions and return correct name for new file
+// method should compute rotate conditions and return correct name for new file, if rotation needed
 func (rl *RotateLog) checkConditions() (bool, string) {
 	for _, condition := range rl.rotationConditions {
 		res, filename := condition()
@@ -182,27 +237,8 @@ func (rl *RotateLog) checkConditions() (bool, string) {
 
 func (rl *RotateLog) genFilename() string {
 	now := rl.clock.Now()
-
-	// XXX HACK: Truncate only happens in UTC semantics, apparently.
-	// observed values for truncating given time with 86400 secs:
-	//
-	// before truncation: 2018/06/01 03:54:54 2018-06-01T03:18:00+09:00
-	// after  truncation: 2018/06/01 03:54:54 2018-05-31T09:00:00+09:00
-	//
-	// This is really annoying when we want to truncate in local time
-	// so we hack: we take the apparent local time in the local zone,
-	// and pretend that it's in UTC. do our math, and put it back to
-	// the local zone
-	var base time.Time
-	if now.Location() != time.UTC {
-		base = time.Date(now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second(), now.Nanosecond(), time.UTC)
-		base = base.Truncate(time.Duration(rl.rotationTime))
-		base = time.Date(base.Year(), base.Month(), base.Day(), base.Hour(), base.Minute(), base.Second(), base.Nanosecond(), base.Location())
-	} else {
-		d := time.Duration(rl.rotationTime)
-		base = now.Truncate(d)
-	}
-	return rl.pattern.FormatString(base)
+	res := rl.pattern.FormatString(now)
+	return res
 }
 
 // Write satisfies the io.Writer interface. It writes to the
@@ -255,6 +291,7 @@ func (rl *RotateLog) getWriter_nolock(bailOnRotateFail bool) (io.Writer, error) 
 
 		stashedFileName := rl.curFn
 		rl.curFn = filename
+		rl.lastTs = rl.clock.Now()
 
 		select {
 		case rl.rotationNotifier <- RotationEvent{PrevFileName: stashedFileName, NewFileName: rl.curFn}:
