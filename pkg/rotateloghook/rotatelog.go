@@ -98,6 +98,10 @@ func New(p string, options ...Option) (*RotateLog, error) {
 func (rl *RotateLog) buildSizeCondition() RotationPredicate {
 	return func() (bool, string) {
 		fi, err := os.Stat(rl.curFn)
+		if errors.Is(err, os.ErrNotExist) {
+			return false, ""
+		}
+
 		if err == nil {
 			if rl.rotationSize > 0 && rl.rotationSize < fi.Size() {
 				s, err := rl.newNameBuilder()
